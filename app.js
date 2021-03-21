@@ -2,6 +2,7 @@ const Discord = require('discord.js'),
     ayarlar = require('./config.json'),
     komutlar = require('./komutlar'),
     chalk = require('chalk'),
+    versiyonKontrol = require('./versiyonkontrol'),
     bot = new Discord.Client();
 
 let debug = ayarlar.debug;
@@ -43,6 +44,7 @@ bot.on('ready', () => {
         });
     }, 10000);
 
+    versiyonKontrol.guncellemeKontrol();
     console.log(cGreen("PenchesBot Hazır!") + " Şuanda " + bot.channels.cache.size + " kanal ve " + bot.guilds.cache.size + " sunucu dinliyor!");
 });
 
