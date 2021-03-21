@@ -1,8 +1,10 @@
 const ayarlar = require('./config.json');
+const axios = require('axios');
 
 let takmaadlar = {
     "h": "yardim", "help": "yardim", "y": "yardim", "commands": "yardim", "komutlar": "yardim",
     "p": "temizle", "t": "temizle", "clear": "temizle", "prune": "temizle",
+    "ig": "insta",
 };
 
 let komutlar = {
@@ -67,6 +69,25 @@ let komutlar = {
                     }, 5000);
                 }
             });
+        }
+    },
+
+    "insta": {
+        aciklama: "Instagram'daki kullanının profil resmini döner.",
+        kullanim: "[instagram kullanıcı adı]",
+        goruntulenebilir: true,
+        islem: function (bot, msg, sonek) {
+            if (sonek.length > 1) {
+                axios.get("https://www.instagram.com/" + sonek + "/?__a=1")
+                    .then(response => {
+                        let hd = response.data.graphql.user.profile_pic_url_hd;
+                        msg.channel.send(hd);
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        msg.channel.send("Kullanıcı verisini alamadım!");
+                    });
+            }
         }
     },
 
