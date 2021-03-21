@@ -1,10 +1,29 @@
 const ayarlar = require('./config.json');
 const axios = require('axios');
+const emoji = require('./bot/emoji');
+const fonk = require('./bot/fonk');
+
+let emojiNames = [];
+for (let eji in emoji.emoji)
+    emojiNames.push(eji);
+
 
 let takmaadlar = {
-    "h": "yardim", "help": "yardim", "y": "yardim", "commands": "yardim", "komutlar": "yardim",
-    "p": "temizle", "t": "temizle", "clear": "temizle", "prune": "temizle",
-    "ig": "insta",
+    "yardim": [
+        "h",
+        "help",
+        "komutlar",
+        "commands",
+    ],
+    "temizle": [
+        "t",
+        "clear",
+        "prune",
+    ],
+    "insta": [
+        "ig",
+    ],
+    "emoji": emojiNames
 };
 
 let komutlar = {
@@ -118,6 +137,50 @@ let komutlar = {
                         });
                     }
                 }
+            }
+        }
+    },
+
+
+    "emoji": {
+        aciklama: "Özel emojileri kullanabilrisiniz. \n\t#örn p!tokat @username",
+        kullanim: "[emoji => " + takmaadlar.emoji.join('|') + "] [kullanıcı adı]",
+        goruntulenebilir: true,
+        islem: async function (bot, msg, sonek, komut) {
+            let ch = msg.channel;
+            let emo = emoji.emoji[komut];
+
+            if (!sonek) {
+                ch.send(emo.userund);
+                return;
+            }
+            if (ch.type !== "dm") {
+                if (!fonk.isUser(sonek)) {
+                    ch.send(emo.usernot);
+                    return;
+                }
+
+                let hedef = fonk.getUserForID(sonek, msg).username;
+                let i = Math.floor(Math.random() * (emo.msg.length + 1));
+                let yazi = emo.msg[i];
+                yazi = yazi.replace(/\?/, msg.author.username);
+                yazi = yazi.replace(/\?/, hedef);
+                let resim = emo.img[i];
+
+
+                const exampleEmbed = {
+                    color: 0x0099ff,
+                    url: 'https://discord.js.org',
+                    author: {
+                        name: yazi,
+                        icon_url: msg.author.avatarURL(),
+                        url: resim,
+                    },
+                    image: {
+                        url: resim,
+                    },
+                };
+                ch.send({embed: exampleEmbed});
             }
         }
     }

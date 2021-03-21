@@ -3,9 +3,11 @@ const Discord = require('discord.js'),
     komutlar = require('./komutlar'),
     chalk = require('chalk'),
     versiyonKontrol = require('./versiyonkontrol'),
+    fonk = require('./bot/fonk'),
     bot = new Discord.Client();
 
 let debug = ayarlar.debug;
+let takmaadlar = null;
 
 cWarn = chalk.bgYellow.black;
 cError = chalk.bgRed.black;
@@ -45,6 +47,9 @@ bot.on('ready', () => {
     }, 10000);
 
     versiyonKontrol.guncellemeKontrol();
+
+    takmaadlar = fonk.tumKomutlar(komutlar.takmaadlar);
+
     console.log(cGreen("PenchesBot Hazır!") + " Şuanda " + bot.channels.cache.size + " kanal ve " + bot.guilds.cache.size + " sunucu dinliyor!");
 });
 
@@ -85,9 +90,9 @@ bot.on('message', msg => {
     if (msg.content.startsWith(ayarlar.command_prefix)) {
         if (komutlar.komutlar.hasOwnProperty(komut)) {
             komutCalistir(msg, komut, sonek, "normal");
-        } else if (komutlar.takmaadlar.hasOwnProperty(komut)) {
+        } else if (takmaadlar.hasOwnProperty(komut)) {
             //msg.content = msg.content.replace(/[^ ]+ /, ayarlar.command_prefix + komutlar.takmaadlar[komut] + " ");
-            komutCalistir(msg, komutlar.takmaadlar[komut], sonek, "normal");
+            komutCalistir(msg, takmaadlar[komut], sonek, "normal", komut);
         }
     }
 });
@@ -109,13 +114,12 @@ function ayarKontrol() {
     }
 }
 
-function komutCalistir(msg, komut, sonek, tip) {
+function komutCalistir(msg, komut, sonek, tip, orj = null) {
     try {
         if (tip === "normal") {
             if (msg.channel.type !== "dm") console.log(cServer(msg.channel.guild.name) + " > " + cGreen(msg.author.username) + " > " + msg.cleanContent.replace(/\n/g, " "));
             else console.log(cGreen(msg.author.username) + " > " + msg.cleanContent.replace(/\n/g, " "));
-
-            komutlar.komutlar[komut].islem(bot, msg, sonek);
+            komutlar.komutlar[komut].islem(bot, msg, sonek, orj);
         }
     } catch (e) {
         console.log(e.stack);
