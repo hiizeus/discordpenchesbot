@@ -1,0 +1,7 @@
+{
+  "token": "BOTTOKEN",
+  "bot_client_id": "BOT ID",
+  "command_prefix": "p!",
+  "admin_id": "ADMIN ID",
+  "debug": false
+}
