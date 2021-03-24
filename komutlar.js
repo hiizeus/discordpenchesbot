@@ -1,7 +1,9 @@
-const ayarlar = require('./config.json');
-const axios = require('axios');
-const emoji = require('./bot/emoji');
-const fonk = require('./bot/fonk');
+const ayarlar = require('./config.json'),
+    axios = require('axios'),
+    emoji = require('./bot/emoji'),
+    fonk = require('./bot/fonk'),
+    ytdl = require('ytdl-core'),
+    fs = require('fs');
 
 let emojiNames = [];
 for (let eji in emoji.emoji)
@@ -22,6 +24,9 @@ let takmaadlar = {
     ],
     "insta": [
         "ig",
+    ],
+    "yt": [
+        "youtube",
     ],
     "emoji": emojiNames
 };
@@ -146,10 +151,9 @@ let komutlar = {
         aciklama: "Özel emojileri kullanabilrisiniz. \n\t#örn p!tokat @username",
         kullanim: "[emoji => " + takmaadlar.emoji.join('|') + "] [kullanıcı adı]",
         goruntulenebilir: true,
-        islem: async function (bot, msg, sonek, komut) {
+        islem: function (bot, msg, sonek, komut) {
             let ch = msg.channel;
             let emo = emoji.emoji[komut];
-
             if (!sonek) {
                 ch.send(emo.userund);
                 return;
@@ -161,12 +165,14 @@ let komutlar = {
                 }
 
                 let hedef = fonk.getUserForID(sonek, msg).username;
-                let i = Math.floor(Math.random() * (emo.msg.length + 1));
+                let i = 0;
+                if (emo.msg.length > 1)
+                    i = Math.floor(Math.random() * (emo.msg.length + 1));
                 let yazi = emo.msg[i];
                 yazi = yazi.replace(/\?/, msg.author.username);
                 yazi = yazi.replace(/\?/, hedef);
-                let resim = emo.img[i];
 
+                let resim = emo.img[i];
 
                 const exampleEmbed = {
                     color: 0x0099ff,
@@ -181,6 +187,29 @@ let komutlar = {
                     },
                 };
                 ch.send({embed: exampleEmbed});
+            }
+        }
+    },
+
+    "yt": {
+        aciklama: "Videonun ham URLini verir. Bu URL üzerinden videoyu indirebilirsin!",
+        kullanim: "[YouTube URL]",
+        goruntulenebilir: true,
+        islem: async function (bot, msg, sonek) {
+            if (sonek.match(/^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/)) {
+                let info = await ytdl.getInfo(sonek);
+                let formatSec = ytdl.chooseFormat(info.formats, {quality: 'highestaudio'});
+
+                const vEmbed = {
+                    color: 0x0099ff,
+                    title: info.videoDetails.title,
+                    url: formatSec.url,
+                    description: 'Video indirmek için hazır başlığa tıklayarak indirebilirsin.',
+                };
+
+                msg.channel.send({embed: vEmbed});
+            } else {
+                msg.channel.send("Kral url geçersiz mk");
             }
         }
     }

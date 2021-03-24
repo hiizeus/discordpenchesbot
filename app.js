@@ -4,6 +4,9 @@ const Discord = require('discord.js'),
     chalk = require('chalk'),
     versiyonKontrol = require('./versiyonkontrol'),
     fonk = require('./bot/fonk'),
+    googleTTS = require('google-tts-api'),
+    fs = require('fs'),
+    ytdl = require('ytdl-core'),
     bot = new Discord.Client();
 
 let debug = ayarlar.debug;
@@ -72,6 +75,33 @@ bot.on("disconnected", () => {
             }
         });
     });
+});
+
+bot.on('voiceStateUpdate', async (eski, yeni) => {
+    let kanal = "720322249105735765";
+    if (yeni.id !== ayarlar.bot_client_id && yeni.channel && yeni.channel.id === kanal) {
+        let sounds = [
+            './sounds/dtw1.mp3',
+            './sounds/dtw2.mp3',
+            './sounds/dtw3.mp3',
+            './sounds/dtw4.mp3',
+            './sounds/dtw5.mp3',
+            './sounds/dtw6.mp3',
+            './sounds/dtw7.mp3',
+            './sounds/dtw8.mp3',
+            './sounds/dtw9.mp3',
+            './sounds/dtw10.mp3',
+            './sounds/dtw11.mp3',
+        ];
+        let sound = sounds[Math.floor(Math.random() * (sounds.length + 1))];
+        yeni.channel.join()
+            .then((con) => {
+                con.play(sound)
+                    .on('finish', () => {
+                        con.channel.leave();
+                    });
+            });
+    }
 });
 
 //Bir mesaj olayı tetiklendiğinde
