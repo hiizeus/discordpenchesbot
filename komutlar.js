@@ -28,6 +28,10 @@ let takmaadlar = {
     "yt": [
         "youtube",
     ],
+    "havadurumu": [
+        "weather",
+        "hava",
+    ],
     "emoji": emojiNames
 };
 
@@ -211,6 +215,55 @@ let komutlar = {
             } else {
                 msg.channel.send("Kral url geçersiz mk");
             }
+        }
+    },
+
+    "havadurumu": {
+        aciklama: "Hava durumunu döner",
+        kullanim: "[Şehir ya da posta kodu]",
+        goruntulenebilir: true,
+        islem: function (bot, msg, sonek) {
+            let c = msg.channel;
+            if (ayarlar.own_api_key == null || ayarlar.own_api_key === "") {
+                c.send("Hava durumu api eksik!");
+                return;
+            }
+            if (sonek == null || sonek === "") {
+                c.send("Şehir ya da posta kodu gerekli");
+                return;
+            }
+            sonek = sonek.replace(' ', '');
+            axios.get('http://api.openweathermap.org/data/2.5/weather?q=' + sonek + "&appid=" + ayarlar.own_api_key)
+                .then(res => {
+                    let data = res.data;
+                    let tempF = Math.round(parseInt(data.main.temp) * (9 / 5) - 459.67) + " °F";
+                    let tempC = Math.round(parseInt(data.main.temp) - 273.15) + " °C";
+                    let windspeedUS = Math.round(parseInt(data.wind.speed) * 2.23694) + " mph";
+                    let windspeed = data.wind.speed + " m/s";
+                    let emoji = "☀";
+
+                    if (data.weather[0].description.indexOf("cloud") > -1) {
+                        emoji = "☁";
+                    }
+                    if (data.weather[0].description.indexOf("snow") > -1) {
+                        emoji = "❄";
+                    }
+                    if (data.weather[0].description.indexOf("rain") > -1
+                        || data.weather[0].description.indexOf("storm") > -1
+                        || data.weather[0].description.indexOf("drizzle") > -1) {
+                        emoji = "🌧";
+                    }
+                    const exampleEmbed = {
+                        color: 0x0099ff,
+                        title: data.name + " için Hava Durumu " + emoji,
+                        description: "**Hava Durumu:** " + data.weather[0].description
+                            + "\n**Sıcaklık:** " + tempF + " / " + tempC
+                            + "\n**Nem Oranı:** " + data.main.humidity + "%"
+                            + "\n**Rüzgar:** " + windspeedUS + " / " + windspeed
+                            + "\n**Bulut:** " + data.clouds.all + "%"
+                    };
+                    c.send({embed: exampleEmbed});
+                });
         }
     }
 };
